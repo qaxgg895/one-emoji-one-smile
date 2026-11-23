@@ -8,7 +8,7 @@
 // no intimacy, no flirtation. A stranger glancing at a phone screen
 // reads it as kind, and it makes them smile back.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const EMOJI = "😇";
 
@@ -35,3 +35,12 @@ const OUTPUT_PATH = "/output/entry.txt";
 
 mkdirSync("/output", { recursive: true });
 writeFileSync(OUTPUT_PATH, EMOJI + "\n", "utf8");
+
+// Write-verify: read the file back and refuse to finish unless its
+// exact bytes are the emoji plus newline, so a truncated or corrupted
+// write can never pass silently.
+const written = readFileSync(OUTPUT_PATH);
+const expected = Buffer.from(EMOJI + "\n", "utf8");
+if (!written.equals(expected)) {
+  throw new Error("entry.txt failed write verification");
+}
